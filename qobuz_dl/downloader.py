@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from typing import Tuple
 
 import requests
@@ -27,6 +28,10 @@ DEFAULT_FOLDER = "{artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz]"
 DEFAULT_TRACK = "{media_number}{tracknumber}. {tracktitle}"
 
 logger = logging.getLogger(__name__)
+
+
+def cleanup_filename(filename):
+    return re.sub(r"\s\s+", " ", filename)
 
 
 class Download:
@@ -99,7 +104,7 @@ class Download:
         folder_format, track_format = _clean_format_str(
             self.folder_format, self.track_format, file_format
         )
-        sanitized_title = sanitize_filepath(folder_format.format(**album_attr))
+        sanitized_title = cleanup_filename(sanitize_filepath(folder_format.format(**album_attr)))
         dirn = os.path.join(self.path, sanitized_title)
         os.makedirs(dirn, exist_ok=True)
 
@@ -158,7 +163,7 @@ class Download:
             track_attr = self._get_track_attr(
                 meta, track_title, bit_depth, sampling_rate
             )
-            sanitized_title = sanitize_filepath(folder_format.format(**track_attr))
+            sanitized_title = cleanup_filename(sanitize_filepath(folder_format.format(**track_attr)))
 
             dirn = os.path.join(self.path, sanitized_title)
             os.makedirs(dirn, exist_ok=True)
@@ -217,7 +222,7 @@ class Download:
 
         # track_format is a format string
         # e.g. '{tracknumber}. {artist} - {tracktitle}'
-        formatted_path = sanitize_filename(self.track_format.format(**filename_attr))
+        formatted_path = cleanup_filename(sanitize_filename(self.track_format.format(**filename_attr)))
         final_file = os.path.join(root_dir, formatted_path)[:250] + extension
 
         if os.path.isfile(final_file):
@@ -256,8 +261,8 @@ class Download:
     @staticmethod
     def _get_track_attr(meta, track_title, bit_depth, sampling_rate):
         return {
-            "album": sanitize_filename(meta["album"]["title"]),
-            "artist": sanitize_filename(meta["album"]["artist"]["name"]),
+            "album": cleanup_filename(sanitize_filename(meta["album"]["title"])),
+            "artist": cleanup_filename(sanitize_filename(meta["album"]["artist"]["name"])),
             "tracktitle": track_title,
             "year": meta["album"]["release_date_original"].split("-")[0],
             "bit_depth": bit_depth,
@@ -267,8 +272,8 @@ class Download:
     @staticmethod
     def _get_album_attr(meta, album_title, file_format, bit_depth, sampling_rate):
         return {
-            "artist": sanitize_filename(meta["artist"]["name"]),
-            "album": sanitize_filename(album_title),
+            "artist": cleanup_filename(sanitize_filename(meta["artist"]["name"])),
+            "album": cleanup_filename(sanitize_filename(album_title)),
             "year": meta["release_date_original"].split("-")[0],
             "format": file_format,
             "bit_depth": bit_depth,
