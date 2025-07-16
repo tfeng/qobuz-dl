@@ -15,16 +15,16 @@ QL_DOWNGRADE = "FormatRestrictedByFormatAvailability"
 DEFAULT_FORMATS = {
     "MP3": [
         "{artist} - {album} ({year}) [MP3]",
-        "{tracknumber}. {tracktitle}",
+        "{media_number}{tracknumber}. {tracktitle}",
     ],
     "Unknown": [
         "{artist} - {album}",
-        "{tracknumber}. {tracktitle}",
+        "{media_number}{tracknumber}. {tracktitle}",
     ],
 }
 
 DEFAULT_FOLDER = "{artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz]"
-DEFAULT_TRACK = "{tracknumber}. {tracktitle}"
+DEFAULT_TRACK = "{media_number}{tracknumber}. {tracktitle}"
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +43,7 @@ class Download:
         no_cover: bool = False,
         folder_format=None,
         track_format=None,
+        disc_folders: bool = False,
     ):
         self.client = client
         self.item_id = item_id
@@ -55,6 +56,7 @@ class Download:
         self.no_cover = no_cover
         self.folder_format = folder_format or DEFAULT_FOLDER
         self.track_format = track_format or DEFAULT_TRACK
+        self.disc_folders = disc_folders
 
     def download_id_by_type(self, track=True):
         if not track:
@@ -202,7 +204,7 @@ class Download:
             logger.info(f"{OFF}Track not available for download")
             return
 
-        if multiple:
+        if multiple and self.disc_folders:
             root_dir = os.path.join(root_dir, f"Disc {multiple}")
             os.makedirs(root_dir, exist_ok=True)
 
@@ -237,8 +239,7 @@ class Download:
         except Exception as e:
             logger.error(f"{RED}Error tagging the file: {e}", exc_info=True)
 
-    @staticmethod
-    def _get_filename_attr(artist, track_metadata, track_title):
+    def _get_filename_attr(self, artist, track_metadata, track_title):
         return {
             "artist": artist,
             "albumartist": _safe_get(
@@ -249,6 +250,7 @@ class Download:
             "tracktitle": track_title,
             "version": track_metadata.get("version"),
             "tracknumber": f"{track_metadata['track_number']:02}",
+            "media_number": f"{('CD' + str(track_metadata['media_number']).rjust(2, '0') + '-') if not self.disc_folders and track_metadata['media_number'] is not None else ''}",
         }
 
     @staticmethod

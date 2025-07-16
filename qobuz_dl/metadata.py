@@ -145,18 +145,18 @@ def tag_flac(
     audio["LABEL"] = album.get("label", {}).get("name", "n/a")
 
     if istrack:
-        audio["GENRE"] = _format_genres(d["album"]["genres_list"])
+        audio["GENRE"] = d["album"]["genre"]["name"]
         audio["ALBUMARTIST"] = d["album"]["artist"]["name"]
         audio["TRACKTOTAL"] = str(d["album"]["tracks_count"])
         audio["ALBUM"] = d["album"]["title"]
-        audio["DATE"] = d["album"]["release_date_original"]
+        audio["DATE"] = d["album"]["release_date_original"][:4]
         audio["COPYRIGHT"] = _format_copyright(d.get("copyright") or "n/a")
     else:
-        audio["GENRE"] = _format_genres(album["genres_list"])
+        audio["GENRE"] = album["genre"]["name"]
         audio["ALBUMARTIST"] = album["artist"]["name"]
         audio["TRACKTOTAL"] = str(album["tracks_count"])
         audio["ALBUM"] = album["title"]
-        audio["DATE"] = album["release_date_original"]
+        audio["DATE"] = album["release_date_original"][:4]
         audio["COPYRIGHT"] = _format_copyright(album.get("copyright") or "n/a")
 
     if em_image:
@@ -198,14 +198,14 @@ def tag_mp3(filename, root_dir, final_name, d, album, istrack=True, em_image=Fal
         tags["artist"] = artist_ or album["artist"]["name"]
 
     if istrack:
-        tags["genre"] = _format_genres(d["album"]["genres_list"])
+        tags["genre"] = d["album"]["genre"]["name"]
         tags["albumartist"] = d["album"]["artist"]["name"]
         tags["album"] = d["album"]["title"]
         tags["date"] = d["album"]["release_date_original"]
         tags["copyright"] = _format_copyright(d["copyright"])
         tracktotal = str(d["album"]["tracks_count"])
     else:
-        tags["genre"] = _format_genres(album["genres_list"])
+        tags["genre"] = album["genre"]["name"]
         tags["albumartist"] = album["artist"]["name"]
         tags["album"] = album["title"]
         tags["date"] = album["release_date_original"]

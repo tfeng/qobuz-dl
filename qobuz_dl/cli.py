@@ -40,16 +40,16 @@ def _reset_config(config_file):
         input(
             "Download quality (5, 6, 7, 27) "
             "[320, LOSSLESS, 24B <96KHZ, 24B >96KHZ]"
-            "\n(leave empty for default '6')\n- "
+            "\n(leave empty for default '27')\n- "
         )
-        or "6"
+        or "27"
     )
     config["DEFAULT"]["default_limit"] = "20"
     config["DEFAULT"]["no_m3u"] = "false"
     config["DEFAULT"]["albums_only"] = "false"
     config["DEFAULT"]["no_fallback"] = "false"
-    config["DEFAULT"]["og_cover"] = "false"
-    config["DEFAULT"]["embed_art"] = "false"
+    config["DEFAULT"]["og_cover"] = "true"
+    config["DEFAULT"]["embed_art"] = "true"
     config["DEFAULT"]["no_cover"] = "false"
     config["DEFAULT"]["no_database"] = "false"
     logging.info(f"{YELLOW}Getting tokens. Please wait...")
@@ -59,6 +59,7 @@ def _reset_config(config_file):
     config["DEFAULT"]["folder_format"] = DEFAULT_FOLDER
     config["DEFAULT"]["track_format"] = DEFAULT_TRACK
     config["DEFAULT"]["smart_discography"] = "false"
+    config["DEFAULT"]["disc_folders"] = "false"
     with open(config_file, "w") as configfile:
         config.write(configfile)
     logging.info(
@@ -132,6 +133,7 @@ def main():
         smart_discography = config.getboolean("DEFAULT", "smart_discography")
         folder_format = config["DEFAULT"]["folder_format"]
         track_format = config["DEFAULT"]["track_format"]
+        disc_folders = config.getboolean("DEFAULT", "disc_folders")
 
         secrets = [
             secret for secret in config["DEFAULT"]["secrets"].split(",") if secret
@@ -176,6 +178,7 @@ def main():
         folder_format=arguments.folder_format or folder_format,
         track_format=arguments.track_format or track_format,
         smart_discography=arguments.smart_discography or smart_discography,
+        disc_folders=arguments.disc_folders or disc_folders,
     )
     qobuz.initialize_client(email, password, app_id, secrets)
 

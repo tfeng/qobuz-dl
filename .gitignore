@@ -1,5 +1,6 @@
 __pycache__
 
+/.vscode/
 /Qobuz Downloads/
 /build/
 /qobuz_dl.egg-info/

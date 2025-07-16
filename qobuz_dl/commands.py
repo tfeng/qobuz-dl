@@ -127,10 +127,13 @@ def add_common_arg(custom_parser, default_folder, default_quality):
         artist, and deluxe/live/collection albums. Gives preference to remastered
         albums, high bit depth/dynamic range, and low sampling rates (to save space).""",
     )
+    custom_parser.add_argument(
+        "--disc-folders", action="store_true", help="create disc folders"
+    )
 
 
 def qobuz_dl_args(
-    default_quality=6, default_limit=20, default_folder="Qobuz Downloads"
+    default_quality=27, default_limit=20, default_folder="Qobuz Downloads"
 ):
     parser = argparse.ArgumentParser(
         prog="qobuz-dl",
