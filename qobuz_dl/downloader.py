@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+from pathlib import Path
 from typing import Tuple
 
 import requests
@@ -32,6 +33,34 @@ logger = logging.getLogger(__name__)
 
 def cleanup_filename(filename):
     return re.sub(r"\s\s+", " ", filename)
+
+def get_file_name(root, name, extension):
+    max_length = 253
+    path = Path(root).absolute()
+    parts = []
+
+    if len(name + extension) > max_length:
+        parts.append(name[:max_length - len(extension) - 3] + "..." + extension)
+    else:
+        parts.append(name + extension)
+
+    while True:
+        if path.name == "":
+            break
+        parts.append(path.name)
+        path = path.parent
+
+    parts.append("/")
+
+    for i in range(len(parts)):
+        if len(parts[i]) > max_length:
+            parts[i] = parts[i][:max_length - 3] + "..."
+
+    path = Path(parts[0])
+    for part in parts[1:]:
+        path = part / path
+
+    return str(path)
 
 
 class Download:
@@ -223,7 +252,7 @@ class Download:
         # track_format is a format string
         # e.g. '{tracknumber}. {artist} - {tracktitle}'
         formatted_path = cleanup_filename(sanitize_filename(self.track_format.format(**filename_attr)))
-        final_file = os.path.join(root_dir, formatted_path)[:250] + extension
+        final_file = get_file_name(root_dir, formatted_path, extension)
 
         if os.path.isfile(final_file):
             logger.info(f"{OFF}{track_title} was already downloaded")
@@ -355,7 +384,7 @@ def _get_title(item_dict):
 
 
 def _get_extra(item, dirn, extra="cover.jpg", og_quality=False):
-    extra_file = os.path.join(dirn, extra)
+    extra_file = get_file_name(dirn, extra, "")
     if os.path.isfile(extra_file):
         logger.info(f"{OFF}{extra} was already downloaded")
         return
